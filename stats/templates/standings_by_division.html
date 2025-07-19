@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Standings by Division</h2>
+
+<style>
+  .division-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  .division-table {
+    flex: 1; 
+    min-width: 300px; 
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 6px 8px;
+    text-align: left;
+  }
+</style>
+
+<div class="division-row">
+  {% for division in division_standings|slice:":2" %}
+  <div class="division-table">
+    <h3>{{ division.name }}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Logo</th><th>Team</th><th>GP</th><th>W</th><th>L</th><th>OT</th><th>PTS</th><th>DIFF</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for team in division.teams %}
+        <tr>
+          <td><img src="{{ team.logo }}" width="40"></td>
+          <td>{{ team.team_name }}</td>
+          <td>{{ team.games_played }}</td>
+          <td>{{ team.wins }}</td>
+          <td>{{ team.losses }}</td>
+          <td>{{ team.ot }}</td>
+          <td>{{ team.points }}</td>
+          <td>{{team.diff}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="division-row">
+  {% for division in division_standings|slice:"2:" %}
+  <div class="division-table">
+    <h3>{{ division.name }}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Logo</th><th>Team</th><th>GP</th><th>W</th><th>L</th><th>OT</th><th>PTS</th><th>DIFF</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for team in division.teams %}
+        <tr>
+          <td><img src="{{ team.logo }}" width="40"></td>
+          <td>{{ team.team_name }}</td>
+          <td>{{ team.games_played }}</td>
+          <td>{{ team.wins }}</td>
+          <td>{{ team.losses }}</td>
+          <td>{{ team.ot }}</td>
+          <td>{{ team.points }}</td>
+          <td>{{team.diff}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

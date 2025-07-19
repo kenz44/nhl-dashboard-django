@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div id="conference_standings">
+    <h2>{{ conference }} Conference Standings</h2>
+
+    <form method="get" action="#conference_standings" style="margin-bottom: 20px;">
+        <label for="conference">Select Conference:</label>
+        <select name="conference" onchange="this.form.submit()">
+            {% for conf in conferences %}
+                <option value="{{ conf }}" {% if conf == conference %}selected{% endif %}>{{ conf }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Logo</th><th>Team</th><th>GP</th><th>W</th><th>L</th><th>OT</th><th>PTS</th><th>DIFF</th>
+                <th>GF</th><th>GA</th><th>L10</th><th>Win %</th><th>Streak</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in conference_standings %}
+            <tr>
+                <td><img src="{{ team.logo }}" width="40"></td>
+                <td>{{ team.team_name }}</td>
+                <td>{{ team.games_played }}</td>
+                <td>{{ team.wins }}</td>
+                <td>{{ team.losses }}</td>
+                <td>{{ team.ot }}</td>
+                <td>{{ team.points }}</td>
+                <td>{{team.diff}}</td>
+                <td>{{ team.gF }}</td>
+                <td>{{ team.gA }}</td>
+                <td>{{ team.last10 }}</td>
+                <td>{{ team.winPctg|floatformat:2 }}</td>
+                <td>{{ team.streak }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

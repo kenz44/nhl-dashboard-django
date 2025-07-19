@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>League Standings</h1>
+
+    {% include "standings_by_division.html" %}
+    <hr>
+    {% include "standings_by_conference.html" %}
+{% endblock %}
