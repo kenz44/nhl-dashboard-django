@@ -8,10 +8,16 @@
         table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
         img { vertical-align: middle; }
+        header { background-color: cadetblue;}
     </style>
 </head>
 <body>
-    <h1>{{ title }}</h1>
+    <header>
+        <nav>
+            <a href="{% url 'standings_overview' %}">League Standings</a>
+            <a href="{% url 'roster_stats' %}">Team Stats</a>
+        </nav>
+    </header>
     {% block content %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>Team Stats</h2>
+
+    <form method="get" action="{% url 'roster_stats' %}">
+        <select name="selected_team_abbr" id="team_abbr" onchange="this.form.submit()">
+            <option value="" disabled selected>Select a team...</option>
+            {% for abbr in team_abbrevs %}
+                <option value="{{ abbr }}" {% if abbr == selected_team %}selected{% endif %}>{{ abbr }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
+  {% if players %}
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Position</th>
+          <th>Games</th>
+          <th>Goals</th>
+          <th>Assists</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for player in players %}
+          <tr>
+            <td>{{ player.full_name }}</td>
+            <td>{{ player.position }}</td>
+            <td>{{ player.reg_season_games_played }}</td>
+            <td>{{ player.reg_goals }}</td>
+            <td>{{ player.reg_assists }}</td>
+            <td>{{ player.reg_points }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No player stats available.</p>
+  {% endif %}
+{% endblock %}
