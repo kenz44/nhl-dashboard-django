@@ -30,6 +30,7 @@ def get_standings():
             'wins': team['wins'],
             'losses': team['losses'],
             'ot': team['otLosses'],
+            'record': f"{team['wins']}-{team['losses']}-{team['otLosses']}",
             'points': team['points'],
             'streak': f"{team['streakCode']}{team['streakCount']}",
             'gF': team['goalFor'],
@@ -108,6 +109,48 @@ async def get_player_stats(player_id, season=None):
     # remember, if here then one of the above stats cannot be found.
     except KeyError as e:
         print(f"Something went wrong for player {player_id}: {e}")
+        stats = None
+
+    return stats
+
+async def get_goalie_stats(goalie_id):
+    url = f"https://api-web.nhle.com/v1/player/{goalie_id}/landing"
+    
+    async with httpx.AsyncClient(follow_redirects=True) as client:
+        response = await client.get(url)
+
+    if response.status_code != 200:
+        print(f"Failed to fetch stats for player {goalie_id}: {response.status_code}")
+        return []
+
+    data = response.json()
+
+    try:
+        # filter out prospects that are on rosters but have not played
+        if 'featuredStats' not in data:
+            print(f"Skipping {goalie_id} — no NHL stats available.")
+            return None
+        
+        # get regular season stats
+        reg_stats = data['featuredStats']['regularSeason']['subSeason']
+        
+        stats = {
+            'id': data['playerId'],
+            'full_name': f"{get_value(data.get('firstName', 'N/A'))} {get_value(data.get('lastName', ''))}",
+            'headshot': data.get('headshot', None),
+            'position': data.get('position', '-'),
+            'current_team': get_value(data.get('fullTeamName', 'N/A')),
+            'reg_season_games_played': reg_stats.get('gamesPlayed', 0),
+            'reg_goals_against_avg': reg_stats.get('goalsAgainstAvg', 0),
+            'reg_losses': reg_stats.get('losses', 0),
+            'reg_ot_losses': reg_stats.get('otLosses', 0),
+            'reg_save_pctg': reg_stats.get('savePctg', 0),
+            'reg_shutouts': reg_stats.get('shutouts', 0),
+            'reg_wins': reg_stats.get('wins', 0)
+        }
+    # remember, if here then one of the above stats cannot be found.
+    except KeyError as e:
+        print(f"Something went wrong for player {goalie_id}: {e}")
         stats = None
 
     return stats

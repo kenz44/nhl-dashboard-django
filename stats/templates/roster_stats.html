@@ -1,22 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
+  <style>
+    body {
+      transition: background-color 0.5s ease;
+    }
+  </style>
+
   <h2>Team Stats</h2>
 
-    <form method="get" action="{% url 'roster_stats' %}">
-        <select name="selected_team_abbr" id="team_abbr" onchange="this.form.submit()">
-            <option value="" disabled selected>Select a team...</option>
-            {% for abbr in team_abbrevs %}
-                <option value="{{ abbr }}" {% if abbr == selected_team %}selected{% endif %}>{{ abbr }}</option>
-            {% endfor %}
-        </select>
-    </form>
+  <form method="get" action="{% url 'roster_stats' %}">
+      <select name="selected_team_abbr" id="team_abbr" onchange="this.form.submit()">
+          <option value="" disabled selected>Select a team...</option>
+          {% for abbr in team_abbrevs %}
+              <option value="{{ abbr }}" {% if abbr == selected_team %}selected{% endif %}>{{ abbr }}</option>
+          {% endfor %}
+      </select>
+  </form>
+
+  <h3>Overview</h3>
+  
+  {% if team_data %}
+    <img src="{{ team_data.logo }}" width="250">
+    <h5>{{ team_data.team_name }}</h5>
+    <h4>Record: {{ team_data.record }}</h4>
+  {% endif %}
 
   {% if players %}
-    <table>
+  <div style="max-height: 50vh; max-width: 50vw; overflow: auto;">
+    <table style="min-width: 600px; width: 100%;">
       <thead>
         <tr>
           <th>Name</th>
+          <th>Headshot</th>
           <th>Position</th>
           <th>Games</th>
           <th>Goals</th>
@@ -28,6 +44,7 @@
         {% for player in players %}
           <tr>
             <td>{{ player.full_name }}</td>
+            <td><img src="{{ player.headshot }}" width="40"></td>
             <td>{{ player.position }}</td>
             <td>{{ player.reg_season_games_played }}</td>
             <td>{{ player.reg_goals }}</td>
@@ -37,7 +54,9 @@
         {% endfor %}
       </tbody>
     </table>
-  {% else %}
-    <p>No player stats available.</p>
-  {% endif %}
+  </div>
+{% else %}
+  <p>No player stats available.</p>
+{% endif %}
+
 {% endblock %}
