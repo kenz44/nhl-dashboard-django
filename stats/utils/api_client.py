@@ -154,3 +154,78 @@ async def get_goalie_stats(goalie_id):
         stats = None
 
     return stats
+
+def get_game_shots(game_id):
+    url = f"https://api-web.nhle.com/v1/gamecenter/{game_id}/play-by-play"
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        print(f"Failed to get game {game_id}: {response.status_code}")
+        return []
+    
+    data = response.json()
+    plays = data.get("plays", [])
+
+    shot_types = {"blocked-shot", "shot-on-goal", "missed-shot", "goal"}
+    shots = [play for play in plays if play.get("typeDescKey") in shot_types]
+    
+    away_team = data.get("awayTeam")
+    home_team = data.get("homeTeam")
+    
+    away_team_shots = []
+    home_team_shots = []
+
+    for shot in shots:
+        details = shot.get("details")
+        if not details:
+            continue
+    
+        team_id = details.get("eventOwnerTeamId")
+        period = shot['periodDescriptor']['number']
+        event_type = shot.get("typeDescKey")
+        x = details.get("xCoord")
+        y = details.get("yCoord")
+
+        # have to switch both x,y in even periods
+        # want to display all shots in one direction
+        if period % 2 == 0:
+            x = -x
+            y = -y
+        
+        # if event_type != 'missed-shot':
+        #     continue
+
+        if team_id == away_team.get("id"):
+            away_team_shots.append(((x, y), event_type))
+        elif team_id == home_team.get("id"):
+            home_team_shots.append(((x, y), event_type))
+    
+    return {
+        "away_shots": away_team_shots,
+        "home_shots": home_team_shots
+    }
+
+def get_date_games(date):
+    url = f"https://api-web.nhle.com/v1/schedule/{date}"
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        print(f"Failed to get game data for {date}: {response.status_code}")
+        return []
+    
+    data = response.json()
+    gameWeek = data.get("gameWeek")
+
+    game_data = []
+    for day in gameWeek:
+        if day["date"] == date:
+            games = day.get('games')
+            for game in games:
+                print(game.get("awayTeam"))
+                game_data.append({
+                    'id': game.get('id'),
+                    'away_team': game.get('awayTeam'),
+                    'home_team': game.get('homeTeam'),
+                })
+
+    return game_data

@@ -1,6 +1,11 @@
 from django.shortcuts import render
-from stats.utils.api_client import get_standings, get_team_roster, get_player_stats
+from stats.utils.api_client import get_standings, get_team_roster, get_player_stats, get_game_shots, get_date_games
+from hockey_rink import NHLRink
+import matplotlib.pyplot as plt
 import asyncio
+import io
+import base64
+import mplcursors
 
 def standings_overview(request):
     standings = get_standings()
@@ -98,3 +103,61 @@ async def team_roster_stats(request):
         'selected_team': selected_team,
         'team_data': team_data,
         'team_color': team_color})
+
+SHOT_SYMBOLS = {
+    "blocked-shot": "s",
+    "shot-on-goal": "o", 
+    "missed-shot": "d", 
+    "goal": "x"
+}
+
+def rink_plot(request):
+    date = request.GET.get('selected_date')
+    selected_game = request.GET.get('selected_game')
+
+    date_games = get_date_games(date) if date else []
+
+    if selected_game:
+        shots = get_game_shots(selected_game)
+
+        # create the fig and ax first
+        fig, ax = plt.subplots(figsize=(30, 18))
+
+        # put the rink on the ax next
+        rink = NHLRink()
+        rink.draw(ax=ax)
+
+        # trying to get the markers on top
+        for im in ax.get_images():
+            im.set_zorder(1)
+
+        # nhl rink width says -100 to 100
+        ax.set_xlim(-100, 100)
+        # nhl rink height says -42.5 to 42.5
+        ax.set_ylim(-42.5, 42.5)
+        ax.set_aspect('equal')
+
+        plot_data = [('home', 'orange', shots['home_shots']),
+                     ('away', 'black', shots['away_shots'])]
+        for team, color, team_shots in plot_data:
+            for (x,y), shot_type in team_shots:
+                marker = SHOT_SYMBOLS.get(shot_type, 'circle')
+                size = 60 if shot_type == 'goal' else 25
+                ax.scatter(x,y, color=color, marker=marker, s=size, label=shot_type, zorder=6)
+                plt.text(x + 1, y + 1, f"({x},{y})", fontsize=8, color='gray')
+
+        # save the fig to png for html usage
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        buf.close()
+    
+    else:
+        image_base64 = None
+
+    return render(request, 'rink_plot.html', 
+        {'rink_image': image_base64,
+         'selected_date': date,
+         'selected_game': selected_game,
+         'date_games': date_games})

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1>Shot Chart on Rink</h1>
+
+    <form method="get" action="{% url 'rink_plot' %}">
+      <label for="date">Date:</label>
+      <input type="date" id="date" name="selected_date" value="{{ selected_date }}" onchange="this.form.submit()">
+    </form>
+
+    <form method="get" action="{% url 'rink_plot' %}">
+        <input type="hidden" name="selected_date" value="{{ selected_date }}">
+        <select name="selected_game" id="game_id" onchange="this.form.submit()">
+            <option value="" disabled {% if not selected_game %}selected{% endif %}>Select a game...</option>
+            {% for game in date_games %}
+                <option value="{{ game.id }}" {% if game.id|stringformat:"s" == selected_game %}selected{% endif %}>
+                    {{ game.away_team.abbrev }} @ {{ game.home_team.abbrev }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+
+    <form action="{% url 'rink_plot' %}">
+        <label></label>
+    </form>
+
+    {% if rink_image %}
+        <img src="data:image/png;base64, {{ rink_image }}" alt="Rink Plot" style="width: 100%; height: auto;">
+    {% elif selected_game %}
+        <p>No shot data to display.</p>
+        {% endif %}
+{% endblock %}
