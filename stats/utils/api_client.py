@@ -1,6 +1,7 @@
 import requests
 # httpx is what allows python to complete tasks async
 import httpx
+from datetime import datetime
 
 # if the obj is dict with 'default' key, return key, else return obj as string 
 def get_value(obj):
@@ -217,15 +218,26 @@ def get_date_games(date):
     gameWeek = data.get("gameWeek")
 
     game_data = []
+    # for day in gameWeek:
+    #     if day["date"] == date:
+    #         games = day.get('games')
+    #         for game in games:
+    #             print(game.get("awayTeam"))
+    #             game_data.append({
+    #                 'id': game.get('id'),
+    #                 'away_team': game.get('awayTeam'),
+    #                 'home_team': game.get('homeTeam'),
+    #             })
     for day in gameWeek:
-        if day["date"] == date:
-            games = day.get('games')
-            for game in games:
-                print(game.get("awayTeam"))
-                game_data.append({
-                    'id': game.get('id'),
-                    'away_team': game.get('awayTeam'),
-                    'home_team': game.get('homeTeam'),
-                })
+        games = day.get('games')
+        for game in games:
+            game_data.append({
+                'id': game.get('id'),
+                'date': day.get('date'),
+                'start_time': datetime.strptime(game['startTimeUTC'], "%Y-%m-%dT%H:%M:%SZ").time(),
+                'venue': get_value(game['venue']),
+                'away_team': game.get('awayTeam'),
+                'home_team': game.get('homeTeam'),
+            })
 
     return game_data
