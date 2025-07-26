@@ -9,12 +9,37 @@
       <input type="date" id="date" name="selected_date" value="{{ selected_date }}" onchange="this.form.submit()">
     </form>
 
+    <!-- use flatpicker to allow dates to be highlighted -->
+    <!-- https://flatpickr.js.org/getting-started/ -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // get game dates from the view (those saved in model)
+            const gameDates = {{ game_dates|safe }};
+            
+            flatpickr("#date", {
+            dateFormat: "Y-m-d",
+            defaultDate: "{{ selected_date }}",
+            
+            // only allow dates to be selected that have games
+            enable: gameDates,
+
+            // auto submit when date is selected
+            onChange: function(selectedDates, dateStr, instance) {
+                instance.input.form.submit();
+            }
+            });
+        });
+    </script>
+
     <form method="get" action="{% url 'rink_plot' %}">
         <input type="hidden" name="selected_date" value="{{ selected_date }}">
         <select name="selected_game" id="game_id" onchange="this.form.submit()">
             <option value="" disabled {% if not selected_game %}selected{% endif %}>Select a game...</option>
             {% for game in date_games %}
-                <option value="{{ game.id }}" {% if game.id|stringformat:"s" == selected_game %}selected{% endif %}>
+                <option value="{{ game.game_id }}" {% if game.id|stringformat:"s" == selected_game %}selected{% endif %}>
                     {{ game.away_team.abbrev }} @ {{ game.home_team.abbrev }}
                 </option>
             {% endfor %}

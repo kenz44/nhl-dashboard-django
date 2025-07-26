@@ -5,7 +5,10 @@ import matplotlib.pyplot as plt
 import asyncio
 import io
 import base64
-import mplcursors
+
+from stats.models import Game, Team
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 def standings_overview(request):
     standings = get_standings()
@@ -112,10 +115,22 @@ SHOT_SYMBOLS = {
 }
 
 def rink_plot(request):
+    game_dates = Game.objects.values_list('game_date', flat=True).distinct()
+    game_dates_list = [d.isoformat() for d in game_dates]
+    game_dates_json = json.dumps(game_dates_list, cls=DjangoJSONEncoder)
+    
     date = request.GET.get('selected_date')
     selected_game = request.GET.get('selected_game')
 
-    date_games = get_date_games(date) if date else []
+    date_games = []
+    if date:
+        date_games = Game.objects.filter(game_date=date)
+        for game in date_games:
+            print('home team----')
+            print(game.home_team_id)
+            print()
+            game.home_team_abbrev = Team.objects.get(team_id=game.home_team_id).abbrev
+            game.away_team_abbrev = Team.objects.get(team_id=game.away_team_id).abbrev
 
     if selected_game:
         shots = get_game_shots(selected_game)
@@ -160,4 +175,5 @@ def rink_plot(request):
         {'rink_image': image_base64,
          'selected_date': date,
          'selected_game': selected_game,
-         'date_games': date_games})
+         'date_games': date_games,
+         'game_dates': game_dates_json})
