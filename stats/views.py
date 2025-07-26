@@ -52,8 +52,8 @@ TEAM_COLORS = {
     'COL': '#6f263d',
     'DAL': '#006847',
     'DET': '#ce1126',
-    'EDM': '#041e42',
-    'FLA': '#041e42',
+    'EDM': "#fda130",
+    'FLA': "#D90505",
     'LAK': '#000000',
     'MIN': '#a6192e',
     'MTL': '#af1e2d',
@@ -126,9 +126,6 @@ def rink_plot(request):
     if date:
         date_games = Game.objects.filter(game_date=date)
         for game in date_games:
-            print('home team----')
-            print(game.home_team_id)
-            print()
             game.home_team_abbrev = Team.objects.get(team_id=game.home_team_id).abbrev
             game.away_team_abbrev = Team.objects.get(team_id=game.away_team_id).abbrev
 
@@ -152,8 +149,8 @@ def rink_plot(request):
         ax.set_ylim(-42.5, 42.5)
         ax.set_aspect('equal')
 
-        plot_data = [('home', 'orange', shots['home_shots']),
-                     ('away', 'black', shots['away_shots'])]
+        plot_data = [('home', TEAM_COLORS.get(game.home_team_abbrev, "#fff"), shots['home_shots']),
+                     ('away', TEAM_COLORS.get(game.away_team_abbrev, "#fff"), shots['away_shots'])]
         for team, color, team_shots in plot_data:
             for (x,y), shot_type in team_shots:
                 marker = SHOT_SYMBOLS.get(shot_type, 'circle')
