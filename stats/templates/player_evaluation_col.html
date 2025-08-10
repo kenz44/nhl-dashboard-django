@@ -1,0 +1,120 @@
+{% block content %}
+    
+    <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px;">
+        <form method="get" action="{% url 'player_evaluation' %}">
+            <select name="selected_team" id="team" onchange="this.form.submit()">
+                <option value="" disabled {% if not selected_team %}selected{% endif %}>Team</option>
+                {% for t in team_abbrevs %}
+                    <option value="{{ t }}" {% if t == selected_team %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <form method="get" action="{% url 'player_evaluation' %}">
+            <input type="hidden" name="selected_team" value="{{ selected_team }}">
+            <select name="selected_player" id="player" onchange="this.form.submit()">
+                <option value="" disabled {% if not selected_team %}selected{% endif %}>Player</option>
+                {% for p in team_players %}
+                    <option value="{{ p.id }}" {% if p.id|stringformat:"s" == selected_player %}selected{% endif %}>
+                        {{ p.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <select name="selected_season" id="season" onchange="this.form.submit()">
+                <option value="" disabled {% if not selected_season %}selected{% endif %}>Season</option>
+                {% for s in seasons %}
+                    <option value="{{ s }}" {% if p == selected_season %}selected{% endif %}>
+                        {{ s }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <select name="selected_game_type" id="game_types" onchange="this.form.submit()">
+                <option value="" disabled {% if not selected_game_type %}selected{% endif %}>Game Type</option>
+                {% for g in game_types %}
+                    <option value="{{ g.id }}" {% if p == selected_game_type %}selected{% endif %}>
+                        {{ g.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        
+            <select name="selected_time" id="time" onchange="this.form.submit()">
+                <option value="" disabled {% if not selected_team %}selected{% endif %}>Time</option>
+                {% for t in time_choices %}
+                    <option value="{{ t }}" {% if t == selected_time %}selected{% endif %}>{{ t }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    {% if player_info %}
+        <div style="display: flex">
+            <img src="{{ player_info.headshot }}" width="200">
+            <h1>{{ player_info.full_name }}</h1>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>TOI</th><th>GP</th><th>G</th><th>A</th><th>PTS</th><th>SOG</th><th>S%</th>
+                    <th>P/60</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ player_stats.toi }}</td>
+                    <td>{{ player_stats.games_played }}</td>
+                    <td>{{ player_stats.goals }}</td>
+                    <td>{{ player_stats.assists }}</td>
+                    <td>{{ player_stats.points }}</td>
+                    <td>{{ player_stats.shots }}</td>
+                    <td>{{ player_stats.shooting_pctg }}</td>
+                    <td>{{ player_stats.id }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+        <canvas id="pointsChart" style="width:100%;max-width:600px"></canvas>
+
+        <script>
+            // since we already pass json strings we mark them as safe
+            const xValues = {{ dates|safe }};
+            const yValues = {{ ppg|safe }};      
+
+            new Chart(document.getElementById("pointsChart"), {
+                type: "line",
+                data: {
+                labels: xValues,
+                datasets: [{
+                    label: "Points Per Game",
+                    fill: false,
+                    lineTension: 0,
+                    backgroundColor: "rgba(54, 162, 235, 0.7)",
+                    borderColor: "rgba(54, 162, 235, 1)",
+                    data: yValues,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+                },
+                options: {
+                scales: {
+                    yAxes: [{
+                    ticks: { beginAtZero: true, stepSize: 1 },
+                    scaleLabel: { display: true, labelString: "Number of Points" }
+                    }],
+                    xAxes: [{
+                    scaleLabel: { display: true, labelString: "Game Date" }
+                    }]
+                }
+                }
+            });
+        </script>
+
+
+    {% endif %}
+    
+
+{% endblock %}

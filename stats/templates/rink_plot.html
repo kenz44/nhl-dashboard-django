@@ -4,10 +4,33 @@
 
     <h1>Shot Chart on Rink</h1>
 
-    <form method="get" action="{% url 'rink_plot' %}">
-      <label for="date">Date:</label>
-      <input type="date" id="date" name="selected_date" value="{{ selected_date }}" onchange="this.form.submit()">
-    </form>
+    <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px;">
+        <form method="get" action="{% url 'rink_plot' %}">
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="selected_date" value="{{ selected_date }}" onchange="this.form.submit()">
+        </form>
+
+        <form method="get" action="{% url 'rink_plot' %}">
+            <label>Select Game:</label>
+            <input type="hidden" name="selected_date" value="{{ selected_date }}">
+            <select name="selected_game" id="game_id" onchange="this.form.submit()">
+                <option value="" disabled {% if not selected_game %}selected{% endif %}>Select a game...</option>
+                {% for game in date_games %}
+                    <option value="{{ game.game_id }}" {% if game.id|stringformat:"s" == selected_game %}selected{% endif %}>
+                        {{ game.away_team.abbrev }} @ {{ game.home_team.abbrev }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+
+        {% if selected_game%}
+            {% for game in date_games %}
+                {% if game.id|stringformat:"s" == selected_game %}
+                    <span>{{ game.away_team.abbrev }} @ {{ game.home_team.abbrev }}</span>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    </div>
 
     <!-- use flatpicker to allow dates to be highlighted -->
     <!-- https://flatpickr.js.org/getting-started/ -->
@@ -33,19 +56,6 @@
             });
         });
     </script>
-
-    <form method="get" action="{% url 'rink_plot' %}">
-        <input type="hidden" name="selected_date" value="{{ selected_date }}">
-        <select name="selected_game" id="game_id" onchange="this.form.submit()">
-            <option value="" disabled {% if not selected_game %}selected{% endif %}>Select a game...</option>
-            {% for game in date_games %}
-                <option value="{{ game.game_id }}" {% if game.id|stringformat:"s" == selected_game %}selected{% endif %}>
-                    {{ game.away_team.abbrev }} @ {{ game.home_team.abbrev }}
-                </option>
-            {% endfor %}
-        </select>
-    </form>
-
 
     <form action="{% url 'rink_plot' %}">
         <label></label>

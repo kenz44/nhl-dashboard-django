@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Player Evaluation</h2>
+
+    <div style="display: flex; gap: 40px;">
+        <div style="flex: 1;">
+            {% include "player_evaluation_col.html" with suffix="left" %}
+        </div>
+    </div>
+{% endblock %}

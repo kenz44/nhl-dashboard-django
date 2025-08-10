@@ -5,4 +5,5 @@ urlpatterns = [
     path('', views.standings_overview, name='standings_overview'),
     path('stats/', views.team_roster_stats, name='roster_stats'),
     path('rink/', views.rink_plot, name='rink_plot'),
+    path('eval/', views.player_evaluation, name='player_evaluation'),
 ]
