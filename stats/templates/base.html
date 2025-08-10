@@ -3,19 +3,49 @@
 <head>
     <title>NHL Dashboard</title>
     <style>
-        body { font-family: sans-serif; padding: 2rem; }
-        nav a { margin-right: 20px; }
+        body { 
+            font-family: sans-serif; 
+            padding: 0 2rem 2rem 2rem; }
+        nav {
+            background-color: lightgrey;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+        /* navbar links into buttons */
+        nav a { 
+            margin-right: 10px; 
+            display: inline-block;
+            color: black;
+            font-weight: bold;
+            border-radius: 4px;
+            background-color: darkgrey;
+        }
+        /* navbar buttons to hover */
+        nav a {
+            text-decoration: none;
+        }
         table { width: 100%; border-collapse: collapse; min-width: 600px; background-color: white;}
         th, td { padding: 8px; border: 1px solid #ccc; text-align: left; white-space: nowrap; }
         img { vertical-align: middle; }
         header { background-color: rgb(249, 249, 249);}
+        input, select, textarea {
+            padding: 5px 5px;
+            border: 1px solid black;
+            background-color:white;
+            border-radius: 20px;
+        }
+        th:nth-child(odd):not(:first-child),
+        td:nth-child(odd):not(:first-child) {
+            background-color: lightgray;
+        }
     </style>
 </head>
 <body style="background-color: {{ team_color|default:'#ffffff' }};">
     <header>
         <nav>
             <a href="{% url 'standings_overview' %}">League Standings</a>
-            <a href="{% url 'roster_stats' %}">Team Stats</a>
+            <a href="{% url 'roster_stats' %}">Team Insights</a>
             <a href="{% url 'rink_plot' %}">Rink Plot</a>
             <a href="{% url 'player_evaluation' %}">Player Evaluation</a>
         </nav>

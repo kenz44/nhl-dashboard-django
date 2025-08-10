@@ -7,7 +7,7 @@
     }
   </style>
 
-  <h2>Team Stats</h2>
+  <h2>Team Insights</h2>
 
   <form method="get" action="{% url 'roster_stats' %}">
       <select name="selected_team_abbr" id="team_abbr" onchange="this.form.submit()">
@@ -18,17 +18,23 @@
       </select>
   </form>
 
-  <h3>Overview</h3>
-  
-  {% if team_data %}
-    <img src="{{ team_data.logo }}" width="250">
-    <h5>{{ team_data.team_name }}</h5>
-    <h4>Record: {{ team_data.record }}</h4>
-  {% endif %}
+  <h3>Skater Stats</h3>
 
   {% if players %}
   <div style="max-height: 50vh; max-width: 50vw; overflow: auto;">
-    <table style="min-width: 600px; width: 100%;">
+    <div style="
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url('{{ team_data.logo }}');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.1;
+      pointer-events: none;
+      z-index: 0;
+    "></div>
+    <table style="min-width: 600px; width: 100%; position: relative; z-index: 1; background: white;">
       <thead>
         <tr>
           <th>Name</th>
@@ -43,8 +49,8 @@
       <tbody>
         {% for player in players %}
           <tr>
-            <td>{{ player.full_name }}</td>
             <td><img src="{{ player.headshot }}" width="40"></td>
+            <td>{{ player.full_name }}</td>
             <td>{{ player.position }}</td>
             <td>{{ player.games_played }}</td>
             <td>{{ player.goals }}</td>
