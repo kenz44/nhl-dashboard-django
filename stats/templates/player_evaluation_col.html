@@ -49,71 +49,97 @@
     </div>
 
     {% if player_info %}
-        <div style="display: flex">
-            <img src="{{ player_info.headshot }}" width="200">
-            <h1>{{ player_info.full_name }}</h1>
+        <div style="display: flex; align-items: flex-start; gap: 30px; flex-wrap: nowrap; ">
+
+            <!-- player's headshot -->
+            <div style="flex: 0 0 200px;">
+                <img src="{{ player_info.headshot }}" width="200" style="display: block; border-radius: 10px;">
+            </div>
+            
+            <!-- player's personal info -->
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 0.25rem">
+                <h1 style="margin: 0;">{{ player_info.full_name }} | {{ player_info.sweater_number }} | {{ player_info.position }}</h1>
+                <h6 style="margin: 0;">Height: </h6>
+                <h6 style="margin: 0;">Weight: </h6>
+                <h6 style="margin: 0;">Born: </h6>
+                <h6 style="margin: 0;">Shoots: </h6>
+                <h6 style="margin: 0;">Draft: </h6>
+            </div>
+
+            {% if player_stats.games_played %}
+                <!-- player stats table -->
+                <div style="flex: 1.5; overflow-x: auto; min-width: 300px;">
+                    <table style="width: 100%; border-collapse: collapse; margin-left: auto; margin-right: auto;">
+                        <thead>
+                            <tr>
+                                <th>TOI</th><th>GP</th><th>G</th><th>A</th><th>PTS</th><th>SOG</th><th>S%</th>
+                                <th>P/60</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ player_stats.toi }}</td>
+                                <td>{{ player_stats.games_played }}</td>
+                                <td>{{ player_stats.goals }}</td>
+                                <td>{{ player_stats.assists }}</td>
+                                <td>{{ player_stats.points }}</td>
+                                <td>{{ player_stats.shots }}</td>
+                                <td>{{ player_stats.shooting_pctg }}</td>
+                                <td>Not yet calculated.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            <!-- handle no stats -->
+            {% else %}
+                <div style="flex: 1; text-align: center;">
+                    <p>No player stats available.</p>
+                </div>
+            {% endif %}
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>TOI</th><th>GP</th><th>G</th><th>A</th><th>PTS</th><th>SOG</th><th>S%</th>
-                    <th>P/60</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{ player_stats.toi }}</td>
-                    <td>{{ player_stats.games_played }}</td>
-                    <td>{{ player_stats.goals }}</td>
-                    <td>{{ player_stats.assists }}</td>
-                    <td>{{ player_stats.points }}</td>
-                    <td>{{ player_stats.shots }}</td>
-                    <td>{{ player_stats.shooting_pctg }}</td>
-                    <td>{{ player_stats.id }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <hr>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+        <!-- handle no stats -->
+        {% if player_stats.games_played %}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 
-        <canvas id="pointsChart" style="width:100%;max-width:600px"></canvas>
+            <canvas id="pointsChart" style="width:100%;max-width:600px"></canvas>
 
-        <script>
-            // since we already pass json strings we mark them as safe
-            const xValues = {{ dates|safe }};
-            const yValues = {{ ppg|safe }};      
+            <script>
+                // since we already pass json strings we mark them as safe
+                const xValues = {{ dates|safe }};
+                const yValues = {{ ppg|safe }};      
 
-            new Chart(document.getElementById("pointsChart"), {
-                type: "line",
-                data: {
-                labels: xValues,
-                datasets: [{
-                    label: "Points Per Game",
-                    fill: false,
-                    lineTension: 0,
-                    backgroundColor: "rgba(54, 162, 235, 0.7)",
-                    borderColor: "rgba(54, 162, 235, 1)",
-                    data: yValues,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-                },
-                options: {
-                scales: {
-                    yAxes: [{
-                    ticks: { beginAtZero: true, stepSize: 1 },
-                    scaleLabel: { display: true, labelString: "Number of Points" }
-                    }],
-                    xAxes: [{
-                    scaleLabel: { display: true, labelString: "Game Date" }
+                new Chart(document.getElementById("pointsChart"), {
+                    type: "line",
+                    data: {
+                    labels: xValues,
+                    datasets: [{
+                        label: "Points Per Game",
+                        fill: false,
+                        lineTension: 0,
+                        backgroundColor: "rgba(54, 162, 235, 0.7)",
+                        borderColor: "rgba(54, 162, 235, 1)",
+                        data: yValues,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
                     }]
-                }
-                }
-            });
-        </script>
-
-
+                    },
+                    options: {
+                    scales: {
+                        yAxes: [{
+                        ticks: { beginAtZero: true, stepSize: 1 },
+                        scaleLabel: { display: true, labelString: "Number of Points" }
+                        }],
+                        xAxes: [{
+                        scaleLabel: { display: true, labelString: "Game Date" }
+                        }]
+                    }
+                    }
+                });
+            </script>
+        {% endif %}
     {% endif %}
     
 

@@ -14,18 +14,26 @@
         }
         /* navbar links into buttons */
         nav a { 
-            margin-right: 10px; 
+            margin-right: 30px; 
             display: inline-block;
             color: black;
             font-weight: bold;
             border-radius: 4px;
-            background-color: darkgrey;
+            background-color: rgb(208, 206, 206);
         }
         /* navbar buttons to hover */
         nav a {
             text-decoration: none;
         }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; background-color: white;}
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 600px; 
+            background-color: #f3f2f2;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        /* table */
         th, td { padding: 8px; border: 1px solid #ccc; text-align: left; white-space: nowrap; }
         img { vertical-align: middle; }
         header { background-color: rgb(249, 249, 249);}
@@ -35,19 +43,20 @@
             background-color:white;
             border-radius: 20px;
         }
+        /* table col coloring */
         th:nth-child(odd):not(:first-child),
         td:nth-child(odd):not(:first-child) {
-            background-color: lightgray;
+            background-color: rgb(220, 219, 219)
         }
     </style>
 </head>
-<body style="background-color: {{ team_color|default:'#ffffff' }};">
+<body style="background-color: white;">
     <header>
         <nav>
             <a href="{% url 'standings_overview' %}">League Standings</a>
             <a href="{% url 'roster_stats' %}">Team Insights</a>
-            <a href="{% url 'rink_plot' %}">Rink Plot</a>
             <a href="{% url 'player_evaluation' %}">Player Evaluation</a>
+            <a href="{% url 'rink_plot' %}">Rink Plot</a>
         </nav>
     </header>
     {% block content %}{% endblock %}

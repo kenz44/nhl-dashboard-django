@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from stats.utils.api_client import get_standings, get_team_roster, get_player_stats, get_game_shots, get_date_games, get_last_n_games_stats, get_player_info
+from stats.utils.api_client import get_standings, get_team_roster, get_player_stats, get_game_shots, get_goalie_stats, get_last_n_games_stats, get_player_info
 from hockey_rink import NHLRink
 import matplotlib.pyplot as plt
 import asyncio
@@ -87,21 +87,35 @@ async def team_roster_stats(request):
         team_data = None
 
     players = []
+    goalies = []
     team_color = "#fff"
 
     if selected_team:
         roster = await get_team_roster(selected_team)
 
-        stats_task = [get_player_stats(player['id']) for player in roster]
-        all_player_stats = await asyncio.gather(*stats_task)
+        player_stats_task = [get_player_stats(player['id']) 
+                      for player in roster
+                      if player.get('positionCode', '') != 'G']
+        goalie_stats_task = [get_goalie_stats(player['id']) 
+                      for player in roster
+                      if player.get('positionCode', '') == 'G']
+        all_player_stats, all_goalie_stats = await asyncio.gather(
+            asyncio.gather(*player_stats_task),
+            asyncio.gather(*goalie_stats_task)    
+        )
 
         filtered_players = [p for p in all_player_stats if p is not None]
         players = sorted(filtered_players, key=lambda p: p['full_name'].split()[-1].lower())
+
+        filtered_goalies = [g for g in all_goalie_stats if g is not None]
+        goalies = sorted(filtered_goalies, key=lambda g: g['full_name'].split()[-1].lower())
+        print(f"goalies ----- {goalies}")
 
         team_color = TEAM_COLORS.get(selected_team, "#fff")
 
     return render(request, 'roster_stats.html', {
         'players': players,
+        'goalies': goalies,
         'team_abbrevs': team_abbrevs,
         'selected_team': selected_team,
         'team_data': team_data,

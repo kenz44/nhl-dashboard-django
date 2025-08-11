@@ -18,12 +18,9 @@
       </select>
   </form>
 
-  <h3>Skater Stats</h3>
-
-  {% if players %}
-  <div style="max-height: 50vh; max-width: 50vw; overflow: auto;">
+  {% if players or goalies %}
+  <div style="display: flex; gap: 20px; align-items: flex-start;">
     <div style="
-      content: '';
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
       background-image: url('{{ team_data.logo }}');
@@ -34,35 +31,71 @@
       pointer-events: none;
       z-index: 0;
     "></div>
-    <table style="min-width: 600px; width: 100%; position: relative; z-index: 1; background: white;">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Headshot</th>
-          <th>Position</th>
-          <th>Games</th>
-          <th>Goals</th>
-          <th>Assists</th>
-          <th>Points</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for player in players %}
+    
+    <!-- Players table container -->
+    <div style="flex: 3;">
+      <h3>Skater Stats</h3>
+      <div style="max-height: 50vh; overflow: auto; position: relative;">
+        <table style="min-width: 500px; width: 100%; position: relative; z-index: 1;">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Headshot</th>
+              <th>Position</th>
+              <th>Games</th>
+              <th>Goals</th>
+              <th>Assists</th>
+              <th>Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for player in players %}
+              <tr>
+                <td><img src="{{ player.headshot }}" width="40"></td>
+                <td>{{ player.full_name }}</td>
+                <td>{{ player.position }}</td>
+                <td>{{ player.games_played }}</td>
+                <td>{{ player.goals }}</td>
+                <td>{{ player.assists }}</td>
+                <td>{{ player.points }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Goalies table container -->
+    <div style="flex: 2; max-height: 50vh; overflow: auto;">
+      <h3>Goalie Stats</h3>
+      <table style="min-width: 400px; width: 100%; position: relative; z-index: 1;">
+        <thead>
           <tr>
-            <td><img src="{{ player.headshot }}" width="40"></td>
-            <td>{{ player.full_name }}</td>
-            <td>{{ player.position }}</td>
-            <td>{{ player.games_played }}</td>
-            <td>{{ player.goals }}</td>
-            <td>{{ player.assists }}</td>
-            <td>{{ player.points }}</td>
+            <th>Name</th>
+            <th>Headshot</th>
+            <th>Games Played</th>
+            <th>Save Pctg</th>
+            <th>GAA</th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% for goalie in goalies %}
+            <tr>
+              <td>{{ goalie.full_name }}</td>
+              <td><img src="{{ goalie.headshot }}" width="40"></td>
+              <td>{{ goalie.season_games_played }}</td>
+              <td>{{ goalie.save_pctg }}</td>
+              <td>{{ goalie.goals_against_avg }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
   </div>
-{% else %}
-  <p>No player stats available.</p>
-{% endif %}
+
+  {% else %}
+    <p>No player stats available.</p>
+  {% endif %}
 
 {% endblock %}

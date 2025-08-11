@@ -58,13 +58,14 @@ async def get_team_roster(team_abbr):
         return []
 
     roster_data = response.json()
-    players = roster_data.get('forwards', []) + roster_data.get('defensemen', []) # + roster_data.get('goalies', [])
+    players = roster_data.get('forwards', []) + roster_data.get('defensemen', []) + roster_data.get('goalies', [])
 
     player_list = []
     for player in players:
         player_list.append({
             'id': player['id'],
-            'name': f"{get_value(player['lastName'])}, {get_value(player['firstName'])}"
+            'name': f"{get_value(player['lastName'])}, {get_value(player['firstName'])}",
+            'positionCode': player['positionCode']
         })
 
     return player_list
@@ -85,7 +86,8 @@ def get_player_info(player_id):
             'full_name': f"{get_value(data.get('firstName', 'N/A'))} {get_value(data.get('lastName', ''))}",
             'headshot': data.get('headshot', None),
             'position': data.get('position', '-'),
-            'current_team': get_value(data.get('fullTeamName', 'N/A'))
+            'current_team': get_value(data.get('fullTeamName', 'N/A')),
+            'sweater_number': data.get('sweaterNumber', '')
         }
     # remember, if here then one of the above stats cannot be found.
     except KeyError as e:
@@ -162,6 +164,8 @@ def get_last_n_games_stats(player_id, season, game_type, n):
     a = 0
     pts = 0
     s = 0
+    toi = 0
+    s_pctg = 0
     ppg = []
     dates = []
     for game in n_games:
@@ -177,13 +181,15 @@ def get_last_n_games_stats(player_id, season, game_type, n):
         minutes, seconds = map(int, game_toi.split(':'))
         toi_seconds += (minutes * 60 + seconds)
 
-    # put toi seconds into proper format
-    avg_toi_seconds = toi_seconds / len(n_games)
-    toi_minutes = int(avg_toi_seconds // 60)
-    toi_remaining_s = int(avg_toi_seconds % 60)
-    toi = f"{toi_minutes}:{toi_remaining_s:02d}"
+    # if no game data there is no data
+    if (len(n_games) != 0):
+        # put toi seconds into proper format
+        avg_toi_seconds = toi_seconds / len(n_games)
+        toi_minutes = int(avg_toi_seconds // 60)
+        toi_remaining_s = int(avg_toi_seconds % 60)
+        toi = f"{toi_minutes}:{toi_remaining_s:02d}"
 
-    s_pctg = (g / s) *100
+        s_pctg = (g / s) *100
 
     stats = {
         'id': player_id,
@@ -197,17 +203,16 @@ def get_last_n_games_stats(player_id, season, game_type, n):
         'points_in_games': ppg,
         'dates': dates
     }
-    print(stats)
     return stats
 
-async def get_goalie_stats(goalie_id):
+async def get_goalie_stats(goalie_id, season='regularSeason'):
     url = f"https://api-web.nhle.com/v1/player/{goalie_id}/landing"
     
     async with httpx.AsyncClient(follow_redirects=True) as client:
         response = await client.get(url)
 
     if response.status_code != 200:
-        print(f"Failed to fetch stats for player {goalie_id}: {response.status_code}")
+        print(f"Failed to fetch stats for goalie {goalie_id}: {response.status_code}")
         return []
 
     data = response.json()
@@ -219,7 +224,7 @@ async def get_goalie_stats(goalie_id):
             return None
         
         # get regular season stats
-        reg_stats = data['featuredStats']['regularSeason']['subSeason']
+        reg_stats = data['featuredStats'][season]['subSeason']
         
         stats = {
             'id': data['playerId'],
@@ -227,13 +232,13 @@ async def get_goalie_stats(goalie_id):
             'headshot': data.get('headshot', None),
             'position': data.get('position', '-'),
             'current_team': get_value(data.get('fullTeamName', 'N/A')),
-            'reg_season_games_played': reg_stats.get('gamesPlayed', 0),
-            'reg_goals_against_avg': reg_stats.get('goalsAgainstAvg', 0),
-            'reg_losses': reg_stats.get('losses', 0),
-            'reg_ot_losses': reg_stats.get('otLosses', 0),
-            'reg_save_pctg': reg_stats.get('savePctg', 0),
-            'reg_shutouts': reg_stats.get('shutouts', 0),
-            'reg_wins': reg_stats.get('wins', 0)
+            'season_games_played': reg_stats.get('gamesPlayed', 0),
+            'goals_against_avg': reg_stats.get('goalsAgainstAvg', 0),
+            'losses': reg_stats.get('losses', 0),
+            'ot_losses': reg_stats.get('otLosses', 0),
+            'save_pctg': reg_stats.get('savePctg', 0),
+            'shutouts': reg_stats.get('shutouts', 0),
+            'wins': reg_stats.get('wins', 0)
         }
     # remember, if here then one of the above stats cannot be found.
     except KeyError as e:

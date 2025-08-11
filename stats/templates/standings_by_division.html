@@ -25,7 +25,7 @@
 <div class="division-row">
   {% for division in division_standings|slice:":2" %}
   <div class="division-table">
-    <h3>{{ division.name }}</h3>
+    <h3 style="background-color: rgb(220, 219, 219);">{{ division.name }}</h3>
     <table>
       <thead>
         <tr>
@@ -54,7 +54,7 @@
 <div class="division-row">
   {% for division in division_standings|slice:"2:" %}
   <div class="division-table">
-    <h3>{{ division.name }}</h3>
+    <h3 style="background-color: rgb(220, 219, 219);">{{ division.name }}</h3>
     <table>
       <thead>
         <tr>
