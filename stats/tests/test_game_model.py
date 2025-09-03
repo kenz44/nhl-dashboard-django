@@ -1,3 +1,10 @@
+"""
+Tests for NHL Dashboard Game model.
+
+Covers:
+- creation, string return, team returns, field constraints, invalid teams, edge cases
+"""
+
 import pytest
 import datetime
 from stats.models import Game, Team
@@ -44,6 +51,7 @@ def game1(edmonton_oilers, calgary_flames):
 #-----------
 
 def test_game_creation(game1, edmonton_oilers, calgary_flames):
+    """ Verify game creation with correct fields/ """
     assert game1.game_id == 1
     assert game1.game_date == datetime.date(2025, 9, 3)
     assert game1.start_time == "00:00"
@@ -52,6 +60,7 @@ def test_game_creation(game1, edmonton_oilers, calgary_flames):
     assert game1.home_team_id == calgary_flames.team_id
 
 def test_game_no_team_ids():
+    """ Check away and home team defaults are set. """
     game = Game.objects.create(
         game_id = 2,
         game_date = datetime.date(2025, 9, 3),
@@ -79,19 +88,19 @@ def test_game_duplicate(game1):
         )
 
 def test_home_team(game1, calgary_flames):
-    """ Teams created should return the team's abbreviation. """
+    """ Games created should return the home team. """
     assert game1.home_team() == calgary_flames
 
 def test_away_team(game1, edmonton_oilers):
-    """ Teams created should return the team's abbreviation. """
+    """ Games created should return the away team. """
     assert game1.away_team() == edmonton_oilers
 
 def test_team_return(game1):
-    """ Teams created should return the team's abbreviation. """
+    """ Games created should return the game string (YYYY-MM-DD - home_abbrev @ away_abbrev). """
     assert str(game1) == "2025-09-03 - EDM @ CGY"
 
 def test_startTime_chars():
-    """ Check the logo max length constraint. """
+    """ Check the start time max length constraint. """
     long_startTime = "s" * 51
 
     game = Game.objects.create(
@@ -107,7 +116,7 @@ def test_startTime_chars():
         game.full_clean()
 
 def test_venue_chars():
-    """ Check the logo max length constraint. """
+    """ Check the venue max length constraint. """
     long_venue = "v" * 51
 
     game = Game.objects.create(
@@ -124,7 +133,7 @@ def test_venue_chars():
 
 @pytest.mark.parametrize("home_id", [0, 1, -1])
 def test_home_team_ids(home_id):
-    """ Check that the abbrev can store values of different lengths and characters. """
+    """ Check that the home_team_id can store different values. """
     game = Game.objects.create(
             game_id = 5,
             game_date = datetime.date(2025, 9, 3),
@@ -137,7 +146,7 @@ def test_home_team_ids(home_id):
 
 @pytest.mark.parametrize("away_id", [0, 1, -1])
 def test_away_team_ids(away_id):
-    """ Check that the abbrev can store values of different lengths and characters. """
+    """ Check that the away_team_id can store different values. """
     game = Game.objects.create(
             game_id = 6,
             game_date = datetime.date(2025, 9, 3),
@@ -150,6 +159,7 @@ def test_away_team_ids(away_id):
 
 @pytest.mark.parametrize("team_id", [0, -1])
 def test_home_team_invalid(edmonton_oilers, team_id):
+    """ Check that a game cannot be created with an invalid away team. """
     game = Game.objects.create(
             game_id = 7,
             game_date = datetime.date(2025, 9, 3),
@@ -164,6 +174,7 @@ def test_home_team_invalid(edmonton_oilers, team_id):
 
 @pytest.mark.parametrize("team_id", [0, -1])
 def test_away_team_invalid(edmonton_oilers, team_id):
+    """ Check that a game cannot be created with an invalid home team. """
     game = Game.objects.create(
             game_id = 7,
             game_date = datetime.date(2025, 9, 3),
