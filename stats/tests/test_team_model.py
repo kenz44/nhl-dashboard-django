@@ -1,12 +1,12 @@
 """
-Tests for NHL Dashboard models.
+Tests for NHL Dashboard Team model.
 
 Covers:
-- Team model: creation, string return, field constraints, edge cases
+- creation, string return, field constraints, edge cases
 """
 
 import pytest
-from stats.models import Team, Game
+from stats.models import Team
 from django.db import IntegrityError
 
 pytestmark = pytest.mark.django_db
@@ -30,12 +30,10 @@ def edmonton_oilers():
 
 def test_team_creation(edmonton_oilers):
     """ Verify team creation with the correct fields. """
-    team = edmonton_oilers
-
-    assert team.team_id == 1
-    assert team.team_name == "Edmonton Oilers"
-    assert team.abbrev == "EDM"
-    assert team.logo == "oilers.png"
+    assert edmonton_oilers.team_id == 1
+    assert edmonton_oilers.team_name == "Edmonton Oilers"
+    assert edmonton_oilers.abbrev == "EDM"
+    assert edmonton_oilers.logo == "oilers.png"
 
 def test_team_return(edmonton_oilers):
     """ Teams created should return the team's abbreviation. """
