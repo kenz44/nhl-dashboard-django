@@ -10,17 +10,6 @@ pytestmark = pytest.mark.django_db
 #-----------
 
 @pytest.fixture
-def game1():
-    return Game.objects.create(
-        game_id = 1,
-        game_date = datetime.date(2025, 9, 3),
-        start_time = "00:00",
-        venue = "Test Venue",
-        away_team_id = 1,
-        home_team_id = 2
-    )
-
-@pytest.fixture
 def edmonton_oilers():
     return Team.objects.create(
         team_id = 1,
@@ -38,17 +27,28 @@ def calgary_flames():
         logo = "flames.png"
     )
 
+@pytest.fixture
+def game1(edmonton_oilers, calgary_flames):
+    return Game.objects.create(
+        game_id = 1,
+        game_date = datetime.date(2025, 9, 3),
+        start_time = "00:00",
+        venue = "Test Venue",
+        away_team_id = edmonton_oilers.team_id,
+        home_team_id = calgary_flames.team_id
+    )
+
 #-----------
 # GAME
 #-----------
 
-def test_game_creation(game1):
+def test_game_creation(game1, edmonton_oilers, calgary_flames):
     assert game1.game_id == 1
     assert game1.game_date == datetime.date(2025, 9, 3)
     assert game1.start_time == "00:00"
     assert game1.venue == "Test Venue"
-    assert game1.away_team_id == 1
-    assert game1.home_team_id == 2
+    assert game1.away_team_id == edmonton_oilers.team_id
+    assert game1.home_team_id == calgary_flames.team_id
 
 def test_game_no_team_ids():
     game = Game.objects.create(
@@ -77,14 +77,14 @@ def test_game_duplicate(game1):
             home_team_id = 2
         )
 
-def test_home_team(calgary_flames, game1):
+def test_home_team(game1, calgary_flames):
     """ Teams created should return the team's abbreviation. """
     assert game1.home_team() == calgary_flames
 
-def test_away_team(edmonton_oilers, game1):
+def test_away_team(game1, edmonton_oilers):
     """ Teams created should return the team's abbreviation. """
     assert game1.away_team() == edmonton_oilers
 
 def test_team_return(game1):
     """ Teams created should return the team's abbreviation. """
-    assert str(game1) == "20250903 - EDM @ CGY"
+    assert str(game1) == "2025-09-03 - EDM @ CGY"

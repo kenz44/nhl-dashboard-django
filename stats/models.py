@@ -24,4 +24,4 @@ class Game(models.Model):
         return Team.objects.get(team_id=self.away_team_id)
     
     def __str__(self):
-        return f"{self.game_date} - {self.away_team} @ {self.home_team}"
+        return f"{self.game_date} - {self.away_team().abbrev} @ {self.home_team().abbrev}"
