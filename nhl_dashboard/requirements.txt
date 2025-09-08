@@ -1,0 +1,13 @@
+# Django framework
+Django>=5.2,<6
+
+# HTTP requests
+requests>=2.31.0
+
+# Testing
+pytest>=7.0
+pytest-django>=4.5
+pytest-mock>=3.10
+
+# test coverage
+# coverage>=7.3
