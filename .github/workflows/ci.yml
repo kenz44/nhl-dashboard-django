@@ -32,11 +32,11 @@ jobs:
         run: |
           python manage.py migrate
 
-      # Run tests
+      # Run tests with coverage
       - name: Run unit tests
         run: |
           # skip integration tests
-          pytest -m "not integration" --tb=short -q
+          pytest -m "not integration" --tb=short -q --cov=stats --cov-report=term-missing --cov-report
   
   integration-tests:
     runs-on: ubuntu-latest
