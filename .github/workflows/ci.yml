@@ -24,19 +24,24 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: |
+          python -m venv venv
+          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest pytest-django
 
       # Run Django migrations
       - name: Apply migrations
         run: |
-          python manage.py migrate
+          source venv/bin/activate
+          python manage.py migrate --settings=settings_test
 
       # Run tests with coverage
       - name: Run unit tests
         run: |
           # skip integration tests
-          pytest --cov=stats --cov-report=term -m "not integration" --tb=short -q
+          source venv/bin/activate
+          pytest --ds=settings_test --cov=stats --cov-report=term -m "not integration" --tb=short -q
   integration-tests:
     runs-on: ubuntu-latest
     if: contains(github.event.head_commit.message, '[integration]')
@@ -57,15 +62,20 @@ jobs:
       # Install dependencies
       - name: Install dependencies
         run: |
+          python -m venv venv
+          source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest pytest-django
 
       # Run Django migrations
       - name: Apply migrations
         run: |
-          python manage.py migrate
+          source venv/bin/activate
+          python manage.py migrate --settings=test_settings
 
       # Run tests
       - name: Run integration tests
         run: |
-          pytest -m integration --tb=short -q
+          source venv/bin/activate
+          pytest --ds=test_settings -m integration --tb=short -q
