@@ -33,14 +33,14 @@ def get_standings():
             'ot': team['otLosses'],
             'record': f"{team['wins']}-{team['losses']}-{team['otLosses']}",
             'points': team['points'],
-            'streak': f"{team['streakCode']}{team['streakCount']}",
+            'streak': f"{team.get('streakCode', '')}{team.get('streakCount', 0)}",
             'gF': team['goalFor'],
             'gA': team['goalAgainst'],
             'diff': team['goalDifferential'],
             'last10': f"{team['l10RegulationWins']}-{team['l10Losses']}-{team['l10OtLosses']}",
-            'winPctg': team['winPctg'],
-            "gF_average": team['goalsForPctg'],
-            "gA_average": (team['goalAgainst'] / team['gamesPlayed'])
+            'winPctg': team.get('winPctg', 0.0),
+            "gF_average": team.get('goalsForPctg', 0),
+            "gA_average": (team['goalAgainst'] / team['gamesPlayed']) if team['gamesPlayed'] else 0
         }
         standings.append(team_data)
 
