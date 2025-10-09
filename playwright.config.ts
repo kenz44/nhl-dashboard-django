@@ -34,7 +34,7 @@ export default defineConfig({
   },
 
   webServer: {
-    command: 'python manage.py runserver --settings=.settings_test',
+    command: 'python manage.py runserver --settings=settings_test',
     url: 'http://127.0.0.1:8000/',
     reuseExistingServer: true,
   },
