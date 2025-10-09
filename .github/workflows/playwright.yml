@@ -25,7 +25,7 @@ jobs:
 
     # add venv and django
     - name: Install python dependencies
-      run:
+      run: |
         python -m venv venv
         source venv/bin/activate
         pip install --upgrade pip
