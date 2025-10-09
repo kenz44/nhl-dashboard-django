@@ -77,5 +77,4 @@ jobs:
       # Run tests
       - name: Run integration tests
         run: |
-          source venv/bin/activate
-          pytest --ds=test_settings -m integration --tb=short -q
+          ./venv/bin/python -m pytest --ds=settings_test --cov=stats --cov-report=term -m "not integration" --tb=short -q
