@@ -1,0 +1,25 @@
+{
+  "name": "nhl-dashboard-django",
+  "version": "1.0.0",
+  "description": "A dynamic web application to explore NHL player and team statistics.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^24.7.1"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kenz44/nhl-dashboard-django.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kenz44/nhl-dashboard-django/issues"
+  },
+  "homepage": "https://github.com/kenz44/nhl-dashboard-django#readme"
+}
