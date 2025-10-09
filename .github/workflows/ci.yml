@@ -28,7 +28,7 @@ jobs:
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-django
+          pip install pytest pytest-django pytest-cov
 
       # Run Django migrations
       - name: Apply migrations
@@ -72,7 +72,7 @@ jobs:
       - name: Apply migrations
         run: |
           source venv/bin/activate
-          python manage.py migrate --settings=test_settings
+          python manage.py migrate --settings=settings_test
 
       # Run tests
       - name: Run integration tests
