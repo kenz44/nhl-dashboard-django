@@ -17,7 +17,7 @@ test.describe('home page',  () => {
         await pageTeamInsights.waitForLoadState('domcontentloaded');
         
         // check link changes
-        await expect(pageTeamInsights.url()).toContain('/stats')
+        expect(pageTeamInsights.url()).toContain('/stats')
 
         // check for proper page header
         const pageHeading = await pageTeamInsights.locator('h2').allTextContents();
@@ -33,7 +33,7 @@ test.describe('home page',  () => {
         await pagePlayerEval.waitForLoadState('domcontentloaded');
         
         // check link changes
-        await expect(pagePlayerEval.url()).toContain('/eval')
+        expect(pagePlayerEval.url()).toContain('/eval')
 
         // check for proper page header
         const pageHeading = await pagePlayerEval.locator('h2').allTextContents();
@@ -49,7 +49,7 @@ test.describe('home page',  () => {
         await pageRinkPlot.waitForLoadState('domcontentloaded');
         
         // check link changes
-        await expect(pageRinkPlot.url()).toContain('/rink')
+        expect(pageRinkPlot.url()).toContain('/rink')
 
         // check for proper page header
         const pageHeading = await pageRinkPlot.locator('h1').allTextContents();
@@ -57,7 +57,12 @@ test.describe('home page',  () => {
     });
 
     test('navbar link League Standings loads on click from other link', async ({ page }) => {
-        await page.goto('http://127.0.0.1:8000/rink/');
+        await page.goto('http://127.0.0.1:8000/');
+
+        // go to another page first
+        await page.getByRole('link', { name: 'Player Evaluation' }).click();
+
+        // go to league standings
         const leagueStandingsPromise = page.waitForEvent('load');
         await page.getByRole('link', { name: 'League Standings' }).click();
         
@@ -65,7 +70,7 @@ test.describe('home page',  () => {
         await pageLeagueStandings.waitForLoadState('domcontentloaded');
         
         // check link changes
-        await expect(pageLeagueStandings.url()).toEqual('http://127.0.0.1:8000/')
+        expect(pageLeagueStandings.url()).toEqual('http://127.0.0.1:8000/')
 
         // check for proper page header
         const pageHeading = await pageLeagueStandings.locator('h2').allTextContents();
