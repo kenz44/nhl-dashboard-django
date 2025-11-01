@@ -2,49 +2,54 @@
     
     <div style="display: flex; gap: 20px; align-items: flex-end; margin-bottom: 20px;">
         <form method="get" action="{% url 'player_evaluation' %}">
-            <select name="selected_team" id="team" onchange="this.form.submit()">
+            
+            <!-- team and season always visible -->
+            <select name="selected_team" onchange="this.form.submit()">
                 <option value="" disabled {% if not selected_team %}selected{% endif %}>Team</option>
                 {% for t in team_abbrevs %}
                     <option value="{{ t }}" {% if t == selected_team %}selected{% endif %}>{{ t }}</option>
                 {% endfor %}
             </select>
-        </form>
 
-        <form method="get" action="{% url 'player_evaluation' %}">
-            <input type="hidden" name="selected_team" value="{{ selected_team }}">
-            <select name="selected_player" id="player" onchange="this.form.submit()">
-                <option value="" disabled {% if not selected_team %}selected{% endif %}>Player</option>
-                {% for p in team_players %}
-                    <option value="{{ p.id }}" {% if p.id|stringformat:"s" == selected_player %}selected{% endif %}>
-                        {{ p.name }}
-                    </option>
-                {% endfor %}
-            </select>
-
-            <select name="selected_season" id="season" onchange="this.form.submit()">
+            <select name="selected_season" onchange="this.form.submit()">
                 <option value="" disabled {% if not selected_season %}selected{% endif %}>Season</option>
                 {% for s in seasons %}
-                    <option value="{{ s }}" {% if p == selected_season %}selected{% endif %}>
-                        {{ s }}
-                    </option>
+                    <option value="{{ s }}" {% if s == selected_season %}selected{% endif %}>{{ s }}</option>
                 {% endfor %}
             </select>
 
-            <select name="selected_game_type" id="game_types" onchange="this.form.submit()">
-                <option value="" disabled {% if not selected_game_type %}selected{% endif %}>Game Type</option>
-                {% for g in game_types %}
-                    <option value="{{ g.id }}" {% if p == selected_game_type %}selected{% endif %}>
-                        {{ g.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        
-            <select name="selected_time" id="time" onchange="this.form.submit()">
-                <option value="" disabled {% if not selected_team %}selected{% endif %}>Time</option>
-                {% for t in time_choices %}
-                    <option value="{{ t }}" {% if t == selected_time %}selected{% endif %}>{{ t }}</option>
-                {% endfor %}
-            </select>
+            {% if team_players %}
+                
+                <!-- player appears if roster exists -->
+                <select name="selected_player" onchange="this.form.submit()">
+                    <option value="" disabled {% if not selected_player %}selected{% endif %}>Player</option>
+                    {% for p in team_players %}
+                        <option value="{{ p.id }}" {% if p.id|stringformat:"s" == selected_player %}selected{% endif %}>
+                            {{ p.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+            {% endif %}
+
+            {% if selected_player %}
+                
+                <!-- game type and time dropdowns appear after player selected -->
+                <select name="selected_game_type" onchange="this.form.submit()">
+                    {% for g in game_types %}
+                        <option value="{{ g.id }}" {% if g.id|stringformat:"s" == selected_game_type %}selected{% endif %}>
+                            {{ g.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <select name="selected_time" onchange="this.form.submit()">
+                    {% for t in time_choices %}
+                        <option value="{{ t }}" {% if t == selected_time %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            
+            {% endif %}
         </form>
     </div>
 

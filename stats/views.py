@@ -9,6 +9,7 @@ import base64
 from stats.models import Game, Team
 import json
 from django.core.serializers.json import DjangoJSONEncoder
+from asgiref.sync import sync_to_async
 
 def standings_overview(request):
     standings = get_standings()
@@ -221,54 +222,62 @@ def rink_plot(request):
 async def player_evaluation(request):
     standings = get_standings()
     team_abbrevs = sorted([team['team_abbr'] for team in standings])
+    seasons = ["20252026", "20242025", "20232024", "20222023"]
 
+    # get all params
     selected_team = request.GET.get('selected_team')
-    if selected_team:
-        team_data = next((team for team in standings if team['team_abbr'] == selected_team), None)
-    else:
-        team_data = None
-
-    roster = []
-    time_choices = ["All Games"] + [str(i) for i in range(1, 21)]
-    seasons = ["20242025", "20232024", "20222023"]
-    game_types = [{'name': 'Regular Season', 'label': 'regularSeason', 'id': 2}, {'name': 'Playoffs', 'label': 'playoffs', 'id': 3}]
-    if selected_team:
-        roster = await get_team_roster(selected_team)
-    
-    selected_player = request.GET.get('selected_player')
     selected_season = request.GET.get('selected_season')
-    selected_game_id = request.GET.get('selected_game_type')
+    selected_player = request.GET.get('selected_player')
+    selected_game_type = request.GET.get('selected_game_type')
     selected_time = request.GET.get('selected_time')
 
-    selected_game_type = next((g for g in game_types if str(g['id']) == selected_game_id), None)
-    
-    player_stats = []
-    player_info = []
-    ppg =[]
+    team_data = next((team for team in standings if team['team_abbr'] == selected_team), None) if selected_team else None
+
+    roster = []
+    if selected_team and selected_season:
+        roster = await get_team_roster(selected_team, selected_season)
+
+    # set defaults
+    if selected_player:
+        if not selected_game_type:
+            selected_game_type = '2'  # regularSeason 
+        if not selected_time:
+            selected_time = 'All Games'
+
+    game_types = [
+        {'name': 'Regular Season', 'label': 'regularSeason', 'id': 2},
+        {'name': 'Playoffs', 'label': 'playoffs', 'id': 3}
+    ]
+    time_choices = ["All Games"] + [str(i) for i in range(1, 21)]
+
+    player_info = {}
+    player_stats = {}
+    ppg = []
     dates = []
-    if selected_player and selected_season and selected_game_type != None:
-        player_info = get_player_info(selected_player)
 
-        if selected_time is not None and selected_time == 'All Games':
-            selected_time = 0
+    if selected_player and selected_season and selected_game_type:
+        # if functions re sync, wrap them
+        player_info = await sync_to_async(get_player_info)(selected_player)
+        n_games = 0 if selected_time == 'All Games' else int(selected_time)
+        player_stats_data = await sync_to_async(get_last_n_games_stats)(selected_player, selected_season, selected_game_type, n_games)
+        player_stats = player_stats_data
+        ppg = player_stats.get('points_in_games', [])
+        dates = player_stats.get('dates', [])
 
-        player_stats = get_last_n_games_stats(selected_player, selected_season, selected_game_id, int(selected_time))
-        ppg = player_stats['points_in_games']
-        dates = player_stats['dates']
-
-    return render(request, 'player_evaluation.html',
-                  {'team_abbrevs': team_abbrevs,
-                   'team_data': team_data,
-                   'selected_team': selected_team,
-                   'team_players': roster,
-                   'selected_player': selected_player,
-                   'time_choices': time_choices,
-                   'selected_time': selected_time,
-                   'player_stats': player_stats,
-                   'seasons':seasons,
-                   'selected_season': selected_season,
-                   'game_types': game_types,
-                   'selected_game_type': selected_game_id,
-                   'player_info': player_info,
-                   'ppg': json.dumps(ppg),
-                   'dates': json.dumps(dates)})
+    return render(request, 'player_evaluation.html', {
+        'team_abbrevs': team_abbrevs,
+        'seasons': seasons,
+        'selected_team': selected_team,
+        'selected_season': selected_season,
+        'team_data': team_data,
+        'team_players': roster,
+        'selected_player': selected_player,
+        'selected_game_type': selected_game_type,
+        'selected_time': selected_time,
+        'game_types': game_types,
+        'time_choices': time_choices,
+        'player_info': player_info,
+        'player_stats': player_stats,
+        'ppg': json.dumps(ppg),
+        'dates': json.dumps(dates)
+    })
