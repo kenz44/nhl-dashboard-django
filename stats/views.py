@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from stats.utils.api_client import get_standings, get_team_roster, get_player_stats, get_game_shots, get_goalie_stats, get_last_n_games_stats, get_player_info
+from stats.utils.api_client import get_standings, get_team_roster, get_stats, get_game_shots, get_last_n_games_stats, get_player_info
 from hockey_rink import NHLRink
 import matplotlib.pyplot as plt
 import asyncio
@@ -76,6 +76,30 @@ TEAM_COLORS = {
     'WSH': '#cf0a2c',
 }
 
+player_keys = {
+    'games_played': 'gamesPlayed',
+    'goals': 'goals',
+    'assists': 'assists',
+    'points': 'points',
+    'plus_minus': 'plusMinus',
+    'penalty_minutes': 'pim',
+    'power_play_goals': 'powerPlayGoals',
+    'power_play_points': 'powerPlayPoints',
+    'short_handed_goals': 'shorthandedGoals',
+    'shots': 'shots',
+    'shooting_pctg': 'shootingPctg'
+}
+
+goalie_keys = {
+    'season_games_played': 'gamesPlayed',
+    'wins': 'wins',
+    'losses': 'losses',
+    'ot_losses': 'otLosses',
+    'goals_against_avg': 'goalsAgainstAvg',
+    'save_pctg': 'savePctg',
+    'shutouts': 'shutouts'
+}
+
 async def team_roster_stats(request):
     standings = get_standings()
     team_abbrevs = sorted([team['team_abbr'] for team in standings])
@@ -95,10 +119,10 @@ async def team_roster_stats(request):
     if selected_team:
         roster = await get_team_roster(selected_team, selected_season)
 
-        player_stats_task = [get_player_stats(player['id'], selected_season) 
+        player_stats_task = [get_stats(player['id'], selected_season, player_keys) 
                       for player in roster
                       if player.get('positionCode', '') != 'G']
-        goalie_stats_task = [get_goalie_stats(player['id'], selected_season) 
+        goalie_stats_task = [get_stats(player['id'], selected_season, goalie_keys) 
                       for player in roster
                       if player.get('positionCode', '') == 'G']
         all_player_stats, all_goalie_stats = await asyncio.gather(

@@ -96,7 +96,7 @@ def get_player_info(player_id):
 
     return basics
 
-async def get_player_stats(player_id, selected_season, gameType=2):
+async def get_stats(player_id, selected_season, stat_keys, gameType=2):
     url = f"https://api-web.nhle.com/v1/player/{player_id}/landing"
     
     async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -116,12 +116,12 @@ async def get_player_stats(player_id, selected_season, gameType=2):
     try: 
         current_season = data['featuredStats']['season']
 
-        # get regular season stats
+        # get current season stats
         if selected_season == str(current_season):
-            reg_stats = data['featuredStats']['regularSeason']['subSeason']
+            season_stats = data['featuredStats']['regularSeason']['subSeason']
             ## TODO: add playoff data
-            season_stats = reg_stats
 
+        # get previous season stats
         else:
             season_stats = None
             for year in data.get('seasonTotals', []):
@@ -130,19 +130,7 @@ async def get_player_stats(player_id, selected_season, gameType=2):
                     break
 
             if not season_stats:
-                season_stats = {
-                    'gamesPlayed': 0,
-                    'goals': 0,
-                    'assists': 0,
-                    'points': 0,
-                    'plusMinus': 0,
-                    'pim': 0,
-                    'powerPlayGoals': 0,
-                    'powerPlayPoints': 0,
-                    'shorthandedGoals': 0,
-                    'shots': 0,
-                    'shootingPctg': 0
-                }
+                season_stats  = { key: 0 for key in stat_keys.values() }
         
         stats = {
             'id': data['playerId'],
@@ -150,18 +138,12 @@ async def get_player_stats(player_id, selected_season, gameType=2):
             'headshot': data.get('headshot', None),
             'position': data.get('position', '-'),
             'current_team': get_value(data.get('fullTeamName', 'N/A')),
-            'games_played': season_stats.get('gamesPlayed', 0),
-            'goals': season_stats.get('goals', 0),
-            'assists': season_stats.get('assists', 0),
-            'points': season_stats.get('points', 0),
-            'plus_minus': season_stats.get('plusMinus', 0),
-            'penalty_minutes': season_stats.get('pim', 0),
-            'power_play_goals': season_stats.get('powerPlayGoals', 0),
-            'power_play_points': season_stats.get('powerPlayPoints', 0),
-            'short_handed_goals': season_stats.get('shorthandedGoals', 0),
-            'shots': season_stats.get('shots', 0),
-            'shooting_pctg': season_stats.get('shootingPctg', 0.0),
         }
+
+        # add stats based on stat_keys given
+        for key_name, api_name in stat_keys.items():
+            stats[key_name] = season_stats.get(api_name, 0)
+
     # remember, if here then one of the above stats cannot be found.
     except KeyError as e:
         print(f"Something went wrong for player {player_id}: {e}")
@@ -230,73 +212,6 @@ def get_last_n_games_stats(player_id, season, game_type, n):
         'points_in_games': ppg,
         'dates': dates
     }
-    return stats
-
-async def get_goalie_stats(goalie_id, selected_season, gameType=2):
-    url = f"https://api-web.nhle.com/v1/player/{goalie_id}/landing"
-    
-    async with httpx.AsyncClient(follow_redirects=True) as client:
-        response = await client.get(url)
-
-    if response.status_code != 200:
-        print(f"Failed to fetch stats for goalie {goalie_id}: {response.status_code}")
-        return None
-
-    data = response.json()
-
-    # filter out prospects that are on rosters but have not played
-    if 'featuredStats' not in data:
-        print(f"Skipping {goalie_id} — no NHL stats available.")
-        return None
-
-    try:        
-        # get regular season stats
-        current_season = data['featuredStats']['season']
-
-        if selected_season == str(current_season):
-            reg_stats = data['featuredStats']['regularSeason']['subSeason']
-            ## TODO: get playoff data later
-            # playoff_stats = data['featuredStats']['playoff']['subSeason']
-            season_stats = reg_stats
-
-        else:
-            season_stats = None
-            for year in data.get('seasonTotals', []):
-                if str(year.get('season')) == selected_season and year.get('gameTypeId') == gameType and year.get('leagueAbbrev') == 'NHL':
-                    season_stats = year
-                    break
-        
-            if not season_stats:
-                print(f"No stats for {data['playerId']} in season {selected_season}")
-                season_stats = {
-                    "gamesPlayed": 0,
-                    "wins": 0,
-                    "losses": 0,
-                    "otLosses": 0,
-                    "goalsAgainstAvg": 0,
-                    "savePctg": 0,
-                    "shutouts": 0
-                }
-
-        stats = {
-            'id': data['playerId'],
-            'full_name': f"{get_value(data.get('firstName', 'N/A'))} {get_value(data.get('lastName', ''))}",
-            'headshot': data.get('headshot', None),
-            'position': data.get('position', '-'),
-            'current_team': get_value(data.get('fullTeamName', 'N/A')),
-            'season_games_played': season_stats.get('gamesPlayed', 0),
-            'goals_against_avg': season_stats.get('goalsAgainstAvg', 0),
-            'losses': season_stats.get('losses', 0),
-            'ot_losses': season_stats.get('otLosses', 0),
-            'save_pctg': season_stats.get('savePctg', 0),
-            'shutouts': season_stats.get('shutouts', 0),
-            'wins': season_stats.get('wins', 0)
-        }
-    # remember, if here then one of the above stats cannot be found.
-    except KeyError as e:
-        print(f"Something went wrong for player {goalie_id}: {e}")
-        stats = None
-
     return stats
 
 def get_game_shots(game_id):
