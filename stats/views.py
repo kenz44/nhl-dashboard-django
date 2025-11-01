@@ -79,8 +79,10 @@ TEAM_COLORS = {
 async def team_roster_stats(request):
     standings = get_standings()
     team_abbrevs = sorted([team['team_abbr'] for team in standings])
+    seasons = ['20252026', '20242025', '20232024', '20222023']
 
     selected_team = request.GET.get('selected_team_abbr')
+    selected_season = request.GET.get('selected_season')
     if selected_team:
         team_data = next((team for team in standings if team['team_abbr'] == selected_team), None)
     else:
@@ -91,12 +93,12 @@ async def team_roster_stats(request):
     team_color = "#fff"
 
     if selected_team:
-        roster = await get_team_roster(selected_team)
+        roster = await get_team_roster(selected_team, selected_season)
 
-        player_stats_task = [get_player_stats(player['id']) 
+        player_stats_task = [get_player_stats(player['id'], selected_season) 
                       for player in roster
                       if player.get('positionCode', '') != 'G']
-        goalie_stats_task = [get_goalie_stats(player['id']) 
+        goalie_stats_task = [get_goalie_stats(player['id'], selected_season) 
                       for player in roster
                       if player.get('positionCode', '') == 'G']
         all_player_stats, all_goalie_stats = await asyncio.gather(
@@ -107,8 +109,9 @@ async def team_roster_stats(request):
         filtered_players = [p for p in all_player_stats if p is not None]
         players = sorted(filtered_players, key=lambda p: p['full_name'].split()[-1].lower())
 
-        filtered_goalies = [g for g in all_goalie_stats if g is not None]
-        goalies = sorted(filtered_goalies, key=lambda g: g['full_name'].split()[-1].lower())
+        filtered_goalies = [g for g in all_goalie_stats 
+                            if g is not None and g.get('season_games_played', 0) > 0]
+        goalies = sorted(filtered_goalies, key=lambda g: g['season_games_played'], reverse=True)
         print(f"goalies ----- {goalies}")
 
         team_color = TEAM_COLORS.get(selected_team, "#fff")
@@ -117,7 +120,9 @@ async def team_roster_stats(request):
         'players': players,
         'goalies': goalies,
         'team_abbrevs': team_abbrevs,
+        'seasons': seasons,
         'selected_team': selected_team,
+        'selected_season': selected_season,
         'team_data': team_data,
         'team_color': team_color})
 

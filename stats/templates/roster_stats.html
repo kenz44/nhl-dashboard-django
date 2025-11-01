@@ -16,6 +16,14 @@
               <option value="{{ abbr }}" {% if abbr == selected_team %}selected{% endif %}>{{ abbr }}</option>
           {% endfor %}
       </select>
+
+      <select name="selected_season" id="season" onchange="this.form.submit()">
+        {% for season in seasons %}
+            <option value="{{ season }}" {% if season == selected_season or not selected_season and season == '20252026' %}selected{% endif %}>
+                {{ season }}
+            </option>
+        {% endfor %}
+      </select>
   </form>
 
   {% if players or goalies %}
